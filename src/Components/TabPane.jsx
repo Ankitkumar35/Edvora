@@ -5,7 +5,7 @@ export const TabPane = (props) => {
     let past=[], upcomming=[], rides = props.rides, dt = new Date(), loc = props.loc;
     const [city, setCity] = useState();
     const [state, setState] = useState();
-    
+    const [tb, setTb] = useState(0);
   
     if(city && state){
         let x =[];
@@ -45,7 +45,7 @@ export const TabPane = (props) => {
        }
     });
     
-    const [current, setCurrent] = useState(rides);
+
  rides.forEach(item => {
      let x = Math.abs(item.origin_station_code - loc);
 
@@ -58,22 +58,26 @@ export const TabPane = (props) => {
    
      return (a.distance - b.distance);
  })
+ let current = [];
+ if(tb === 0)  current = rides;
+ else if(tb == 1) current = upcomming;
+ else current=past;
   return (
       <>
     <Nav variant="tabs" defaultActiveKey="link-0">
-  <Nav.Item onClick={()=> setCurrent(rides)}>
+  <Nav.Item onClick={()=> setTb(0)}>
     <Nav.Link eventKey="link-0">Nearest rides</Nav.Link>
   </Nav.Item>
-  <Nav.Item onClick={()=> setCurrent(upcomming)}>
+  <Nav.Item onClick={()=> setTb(1)}>
     <Nav.Link eventKey="link-1">Upcomming rides ({upcomming.length})</Nav.Link>
   </Nav.Item>
-  <Nav.Item onClick={()=> setCurrent(past)}>
+  <Nav.Item onClick={()=> setTb(2)}>
     <Nav.Link eventKey="link-2">Past rides({past.length})</Nav.Link>
   </Nav.Item>
 
 </Nav>
 {
-    props.rides ? (<div style={{marginTop: '15px', textAlign:'center'}}><select onChange={e=> setCity(e.target.value)}>
+    props.rides ? (<div style={{marginTop: '15px', textAlign:'center'}}><select value={city} onChange={e=> {setCity(e.target.value); props.rides.forEach((item) => {if(item.city === e.target.value) {setState(item.state); return;}})}}>
     <option value={''}>City</option>
     {
         props.rides.map((item, ind)=>{
@@ -82,7 +86,7 @@ export const TabPane = (props) => {
     }
 </select >     
 
-<select style={{marginLeft:'10px'}} onChange={e=> setState(e.target.value)}>
+<select style={{marginLeft:'10px'}} value={state} onChange={e=> {setState(e.target.value); setCity('')}}>
     <option value={''}>State</option>
     {
         props.rides.map((item, ind)=>{
@@ -95,7 +99,7 @@ export const TabPane = (props) => {
 </div>) : null
 }
 {
-  rides.length ?   (rides.map((item, index)=>{
+  current.length ?   (current.map((item, index)=>{
     return (<Cards dt={dt.toString()} ride={item} key={index} distance={item.distance}/>)
 })) : <h1 style={{marginTop: '10%', textAlign:'center'}}>No Rides</h1>
 }
